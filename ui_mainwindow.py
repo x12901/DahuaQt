@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'camfezjpu.ui'
+## Form generated from reading UI file 'camxVcocv.ui'
 ##
 ## Created by: Qt User Interface Compiler version 5.15.1
 ##
@@ -18,17 +18,17 @@ class Ui_Form(object):
         if not Form.objectName():
             Form.setObjectName(u"Form")
         Form.resize(800, 600)
-        self.widget = QWidget(Form)
-        self.widget.setObjectName(u"widget")
-        self.widget.setGeometry(QRect(14, 16, 292, 371))
-        self.horizontalLayout_6 = QHBoxLayout(self.widget)
+        self.layoutWidget = QWidget(Form)
+        self.layoutWidget.setObjectName(u"layoutWidget")
+        self.layoutWidget.setGeometry(QRect(14, 16, 375, 371))
+        self.horizontalLayout_6 = QHBoxLayout(self.layoutWidget)
         self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
         self.horizontalLayout_6.setContentsMargins(0, 0, 0, 0)
         self.gridLayout_3 = QGridLayout()
         self.gridLayout_3.setObjectName(u"gridLayout_3")
         self.gridLayout_2 = QGridLayout()
         self.gridLayout_2.setObjectName(u"gridLayout_2")
-        self.line_device_number = QLineEdit(self.widget)
+        self.line_device_number = QLineEdit(self.layoutWidget)
         self.line_device_number.setObjectName(u"line_device_number")
         self.line_device_number.setEnabled(True)
         self.line_device_number.setMaximumSize(QSize(80, 16777215))
@@ -36,12 +36,13 @@ class Ui_Form(object):
 
         self.gridLayout_2.addWidget(self.line_device_number, 0, 2, 1, 1)
 
-        self.combo_device_list = QComboBox(self.widget)
+        self.combo_device_list = QComboBox(self.layoutWidget)
         self.combo_device_list.setObjectName(u"combo_device_list")
+        self.combo_device_list.setMinimumSize(QSize(150, 0))
 
         self.gridLayout_2.addWidget(self.combo_device_list, 0, 0, 1, 1)
 
-        self.label_4 = QLabel(self.widget)
+        self.label_4 = QLabel(self.layoutWidget)
         self.label_4.setObjectName(u"label_4")
         font = QFont()
         font.setPointSize(9)
@@ -49,135 +50,143 @@ class Ui_Form(object):
 
         self.gridLayout_2.addWidget(self.label_4, 0, 1, 1, 1)
 
+
         self.gridLayout_3.addLayout(self.gridLayout_2, 0, 0, 1, 1)
 
-        self.btn_enum_devices = QPushButton(self.widget)
+        self.btn_enum_devices = QPushButton(self.layoutWidget)
         self.btn_enum_devices.setObjectName(u"btn_enum_devices")
 
         self.gridLayout_3.addWidget(self.btn_enum_devices, 1, 0, 1, 1)
 
         self.horizontalLayout_5 = QHBoxLayout()
         self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
-        self.btn_open_device = QPushButton(self.widget)
+        self.btn_open_device = QPushButton(self.layoutWidget)
         self.btn_open_device.setObjectName(u"btn_open_device")
 
         self.horizontalLayout_5.addWidget(self.btn_open_device)
 
-        self.btn_close_device = QPushButton(self.widget)
+        self.btn_close_device = QPushButton(self.layoutWidget)
         self.btn_close_device.setObjectName(u"btn_close_device")
 
         self.horizontalLayout_5.addWidget(self.btn_close_device)
+
 
         self.gridLayout_3.addLayout(self.horizontalLayout_5, 2, 0, 1, 1)
 
         self.horizontalLayout_4 = QHBoxLayout()
         self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
-        self.radio_continuous = QRadioButton(self.widget)
+        self.radio_continuous = QRadioButton(self.layoutWidget)
         self.radio_continuous.setObjectName(u"radio_continuous")
         self.radio_continuous.setChecked(True)
 
         self.horizontalLayout_4.addWidget(self.radio_continuous)
 
-        self.radio_trigger = QRadioButton(self.widget)
+        self.radio_trigger = QRadioButton(self.layoutWidget)
         self.radio_trigger.setObjectName(u"radio_trigger")
 
         self.horizontalLayout_4.addWidget(self.radio_trigger)
+
 
         self.gridLayout_3.addLayout(self.horizontalLayout_4, 3, 0, 1, 1)
 
         self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
-        self.btn_start_grabbing = QPushButton(self.widget)
+        self.btn_start_grabbing = QPushButton(self.layoutWidget)
         self.btn_start_grabbing.setObjectName(u"btn_start_grabbing")
 
         self.horizontalLayout_3.addWidget(self.btn_start_grabbing)
 
-        self.btn_stop_grabbing = QPushButton(self.widget)
+        self.btn_stop_grabbing = QPushButton(self.layoutWidget)
         self.btn_stop_grabbing.setObjectName(u"btn_stop_grabbing")
 
         self.horizontalLayout_3.addWidget(self.btn_stop_grabbing)
+
 
         self.gridLayout_3.addLayout(self.horizontalLayout_3, 4, 0, 1, 1)
 
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.checkbtn_trigger_software = QCheckBox(self.widget)
+        self.checkbtn_trigger_software = QCheckBox(self.layoutWidget)
         self.checkbtn_trigger_software.setObjectName(u"checkbtn_trigger_software")
 
         self.horizontalLayout_2.addWidget(self.checkbtn_trigger_software)
 
-        self.btn_trigger_once = QPushButton(self.widget)
+        self.btn_trigger_once = QPushButton(self.layoutWidget)
         self.btn_trigger_once.setObjectName(u"btn_trigger_once")
 
         self.horizontalLayout_2.addWidget(self.btn_trigger_once)
 
+
         self.gridLayout_3.addLayout(self.horizontalLayout_2, 5, 0, 1, 1)
 
-        self.btn_save_bmp = QPushButton(self.widget)
+        self.btn_save_bmp = QPushButton(self.layoutWidget)
         self.btn_save_bmp.setObjectName(u"btn_save_bmp")
 
         self.gridLayout_3.addWidget(self.btn_save_bmp, 6, 0, 1, 1)
 
         self.gridLayout = QGridLayout()
         self.gridLayout.setObjectName(u"gridLayout")
-        self.label = QLabel(self.widget)
+        self.label = QLabel(self.layoutWidget)
         self.label.setObjectName(u"label")
 
         self.gridLayout.addWidget(self.label, 0, 0, 1, 2)
 
-        self.line_exposure_time = QLineEdit(self.widget)
+        self.line_exposure_time = QLineEdit(self.layoutWidget)
         self.line_exposure_time.setObjectName(u"line_exposure_time")
 
         self.gridLayout.addWidget(self.line_exposure_time, 0, 2, 1, 1)
 
-        self.label_2 = QLabel(self.widget)
+        self.label_2 = QLabel(self.layoutWidget)
         self.label_2.setObjectName(u"label_2")
 
         self.gridLayout.addWidget(self.label_2, 1, 0, 1, 1)
 
-        self.label_3 = QLabel(self.widget)
+        self.label_3 = QLabel(self.layoutWidget)
         self.label_3.setObjectName(u"label_3")
 
         self.gridLayout.addWidget(self.label_3, 2, 0, 1, 1)
 
-        self.line_gain = QLineEdit(self.widget)
+        self.line_gain = QLineEdit(self.layoutWidget)
         self.line_gain.setObjectName(u"line_gain")
 
         self.gridLayout.addWidget(self.line_gain, 1, 2, 1, 1)
 
-        self.line_frame_rate = QLineEdit(self.widget)
+        self.line_frame_rate = QLineEdit(self.layoutWidget)
         self.line_frame_rate.setObjectName(u"line_frame_rate")
 
         self.gridLayout.addWidget(self.line_frame_rate, 2, 2, 1, 1)
+
 
         self.gridLayout_3.addLayout(self.gridLayout, 7, 0, 1, 1)
 
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.btn_get_parameter = QPushButton(self.widget)
+        self.btn_get_parameter = QPushButton(self.layoutWidget)
         self.btn_get_parameter.setObjectName(u"btn_get_parameter")
 
         self.horizontalLayout.addWidget(self.btn_get_parameter)
 
-        self.btn_set_parameter = QPushButton(self.widget)
+        self.btn_set_parameter = QPushButton(self.layoutWidget)
         self.btn_set_parameter.setObjectName(u"btn_set_parameter")
 
         self.horizontalLayout.addWidget(self.btn_set_parameter)
 
+
         self.gridLayout_3.addLayout(self.horizontalLayout, 8, 0, 1, 1)
+
 
         self.horizontalLayout_6.addLayout(self.gridLayout_3)
 
-        self.label_photo = QLabel(self.widget)
+        self.label_photo = QLabel(self.layoutWidget)
         self.label_photo.setObjectName(u"label_photo")
 
         self.horizontalLayout_6.addWidget(self.label_photo)
 
-        # if QT_CONFIG(shortcut)
+#if QT_CONFIG(shortcut)
         self.label.setBuddy(self.line_exposure_time)
         self.label_2.setBuddy(self.line_gain)
         self.label_3.setBuddy(self.line_frame_rate)
-        # endif // QT_CONFIG(shortcut)
+#endif // QT_CONFIG(shortcut)
         QWidget.setTabOrder(self.btn_enum_devices, self.btn_open_device)
         QWidget.setTabOrder(self.btn_open_device, self.btn_close_device)
         QWidget.setTabOrder(self.btn_close_device, self.btn_start_grabbing)
@@ -211,7 +220,6 @@ class Ui_Form(object):
         self.radio_trigger.clicked.connect(Form.radio_trigger_clicked)
 
         QMetaObject.connectSlotsByName(Form)
-
     # setupUi
 
     def retranslateUi(self, Form):
@@ -234,3 +242,4 @@ class Ui_Form(object):
         self.btn_set_parameter.setText(QCoreApplication.translate("Form", u"\u8bbe\u7f6e\u53c2\u6570", None))
         self.label_photo.setText(QCoreApplication.translate("Form", u"\u56fe\u50cf", None))
     # retranslateUi
+

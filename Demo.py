@@ -384,10 +384,10 @@ def setExposureTime(camera, dVal):
     return 0
 
 
-# 设置曝光
+# 获取曝光
 # get camera ExposureTime
 def getExposureTime(camera, dVal):
-    # 通用属性设置:设置曝光 --根据属性类型，直接构造属性节点。如曝光是 double类型，构造doubleNode节点
+    # 通用属性设置:获取曝光 --根据属性类型，直接构造属性节点。如曝光是 double类型，构造doubleNode节点
     # create corresponding property node according to the value type of property, here is doubleNode
     exposureTimeNode = pointer(GENICAM_DoubleNode())
     exposureTimeNodeInfo = GENICAM_DoubleNodeInfo()
@@ -398,17 +398,17 @@ def getExposureTime(camera, dVal):
         print("create ExposureTime Node fail!")
         return -1
 
-    # 设置曝光时间
+    # 获取曝光时间
     # get ExposureTime
     nRet = exposureTimeNode.contents.getValue(exposureTimeNode, c_double(dVal))
     if (nRet != 0):
-        print("set ExposureTime value [%f]us fail!" % (dVal))
+        print("get ExposureTime value [%f]us fail!" % (dVal))
         # 释放相关资源
         # release node resource before return
         exposureTimeNode.contents.release(exposureTimeNode)
         return -1
     else:
-        print("set ExposureTime value [%f]us success." % (dVal))
+        print("get ExposureTime value [%f]us success." % (dVal))
 
     # 释放节点资源
     # release node resource at the end of use

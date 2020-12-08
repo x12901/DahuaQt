@@ -2,14 +2,22 @@
 # -- coding: utf-8 --
 # author: morgan time:2020/12/7
 import sys
+
+import cv2
+import numpy
 from PySide2.QtWidgets import QApplication, QMainWindow
 from PySide2.QtCore import QFile
 from ui_mainwindow import Ui_Form
 from Demo import *
 
+camera = None
+cameraList = None
+streamSource = None
+userInfo = None
+trigModeEnumNode = None
+
 
 class MainWindow(QMainWindow):
-    global camera, streamSource, userInfo, cameraList, trigModeEnumNode
 
     def __init__(self):
         super(MainWindow, self).__init__()
@@ -17,9 +25,8 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
 
     def enum_devices_clicked(self):
+        global camera, streamSource, userInfo, cameraList, trigModeEnumNode
         print('enum_devices_clicked')
-        # self.ui.line_device_number.setText("dahua1")
-        # self.ui.combo_device_list.addItem('dahua120')
 
         # 发现相机
         # enumerate camera
@@ -39,15 +46,17 @@ class MainWindow(QMainWindow):
 
             self.ui.combo_device_list.addItem(str(camera.getModelName(camera)))
 
-        self.ui.line_device_number.setText(cameraCnt)
+        self.ui.line_device_number.setText(str(cameraCnt))
 
         camera = cameraList[0]
 
     def device_list_changed(self):
+        global camera, streamSource, userInfo, cameraList, trigModeEnumNode
         camera = cameraList[self.ui.combo_device_list.currentIndex()]
         pass
 
     def open_device_clicked(self):
+        global camera, streamSource, userInfo, cameraList, trigModeEnumNode
         # 打开相机
         # open camera
         nRet = openCamera(camera)
@@ -55,6 +64,71 @@ class MainWindow(QMainWindow):
             print("openCamera fail.")
             return -1
 
+        pass
+
+    def close_device_clicked(self):
+        global camera, streamSource, userInfo, cameraList, trigModeEnumNode
+        # 关闭相机
+        # close camera
+        nRet = closeCamera(camera)
+        if nRet != 0:
+            print("closeCamera fail")
+            # 释放相关资源
+            # release stream source object before return
+            streamSource.contents.release(streamSource)
+            return -1
+
+        # 释放相关资源
+        # release stream source object at the end of use
+        streamSource.contents.release(streamSource)
+        pass
+
+    def radio_continuous_clicked(self):
+        global camera, streamSource, userInfo, cameraList, trigModeEnumNode
+        if self.ui.radio_continuous.isChecked():
+            nRet = trigModeEnumNode.contents.setValueBySymbol(trigModeEnumNode, b"Off")
+            if nRet != 0:
+                print("set TriggerMode value [Off] fail!")
+                # 释放相关资源
+                # release node resource before return
+                trigModeEnumNode.contents.release(trigModeEnumNode)
+                streamSource.contents.release(streamSource)
+                return -1
+        else:
+            nRet = trigModeEnumNode.contents.setValueBySymbol(trigModeEnumNode, b"on")
+            if nRet != 0:
+                print("set TriggerMode value [on] fail!")
+                # 释放相关资源
+                # release node resource before return
+                trigModeEnumNode.contents.release(trigModeEnumNode)
+                streamSource.contents.release(streamSource)
+                return -1
+        pass
+
+    def radio_trigger_clicked(self):
+        global camera, streamSource, userInfo, cameraList, trigModeEnumNode
+        if self.ui.radio_trigger.isChecked():
+            nRet = trigModeEnumNode.contents.setValueBySymbol(trigModeEnumNode, b"on")
+            if nRet != 0:
+                print("set TriggerMode value [on] fail!")
+                # 释放相关资源
+                # release node resource before return
+                trigModeEnumNode.contents.release(trigModeEnumNode)
+                streamSource.contents.release(streamSource)
+                return -1
+        else:
+            nRet = trigModeEnumNode.contents.setValueBySymbol(trigModeEnumNode, b"Off")
+            if nRet != 0:
+                print("set TriggerMode value [Off] fail!")
+                # 释放相关资源
+                # release node resource before return
+                trigModeEnumNode.contents.release(trigModeEnumNode)
+                streamSource.contents.release(streamSource)
+                return -1
+        pass
+
+    def start_grabbing_clicked(self):
+        global camera, streamSource, userInfo, cameraList, trigModeEnumNode
         # 创建流对象
         # create stream source object
         streamSourceInfo = GENICAM_StreamSourceInfo()
@@ -95,67 +169,6 @@ class MainWindow(QMainWindow):
         # release node resource at the end of use
         trigModeEnumNode.contents.release(trigModeEnumNode)
 
-        pass
-
-    def close_device_clicked(self):
-        # 关闭相机
-        # close camera
-        nRet = closeCamera(camera)
-        if nRet != 0:
-            print("closeCamera fail")
-            # 释放相关资源
-            # release stream source object before return
-            streamSource.contents.release(streamSource)
-            return -1
-
-        # 释放相关资源
-        # release stream source object at the end of use
-        streamSource.contents.release(streamSource)
-        pass
-
-    def radio_continuous_clicked(self):
-        if self.ui.radio_continuous.isChecked():
-            nRet = trigModeEnumNode.contents.setValueBySymbol(trigModeEnumNode, b"Off")
-            if nRet != 0:
-                print("set TriggerMode value [Off] fail!")
-                # 释放相关资源
-                # release node resource before return
-                trigModeEnumNode.contents.release(trigModeEnumNode)
-                streamSource.contents.release(streamSource)
-                return -1
-        else:
-            nRet = trigModeEnumNode.contents.setValueBySymbol(trigModeEnumNode, b"on")
-            if nRet != 0:
-                print("set TriggerMode value [on] fail!")
-                # 释放相关资源
-                # release node resource before return
-                trigModeEnumNode.contents.release(trigModeEnumNode)
-                streamSource.contents.release(streamSource)
-                return -1
-        pass
-
-    def radio_trigger_clicked(self):
-        if self.ui.radio_trigger.isChecked():
-            nRet = trigModeEnumNode.contents.setValueBySymbol(trigModeEnumNode, b"on")
-            if nRet != 0:
-                print("set TriggerMode value [on] fail!")
-                # 释放相关资源
-                # release node resource before return
-                trigModeEnumNode.contents.release(trigModeEnumNode)
-                streamSource.contents.release(streamSource)
-                return -1
-        else:
-            nRet = trigModeEnumNode.contents.setValueBySymbol(trigModeEnumNode, b"Off")
-            if nRet != 0:
-                print("set TriggerMode value [Off] fail!")
-                # 释放相关资源
-                # release node resource before return
-                trigModeEnumNode.contents.release(trigModeEnumNode)
-                streamSource.contents.release(streamSource)
-                return -1
-        pass
-
-    def start_grabbing_clicked(self):
         # 注册拉流回调函数
         # subscribe grabbing callback
         userInfo = b"test"
@@ -178,9 +191,84 @@ class MainWindow(QMainWindow):
             streamSource.contents.release(streamSource)
             return -1
 
+        isGrab = True
+
+        while isGrab:
+            # 主动取图
+            # get one frame
+            frame = pointer(GENICAM_Frame())
+            nRet = streamSource.contents.getFrame(streamSource, byref(frame), c_uint(1000))
+            if nRet != 0:
+                print("getFrame fail! Timeout:[1000]ms")
+                # 释放相关资源
+                # release stream source object before return
+                streamSource.contents.release(streamSource)
+                return -1
+            else:
+                print("getFrame success BlockId = [" + str(
+                    frame.contents.getBlockId(frame)) + "], get frame time: " + str(datetime.datetime.now()))
+
+            nRet = frame.contents.valid(frame)
+            if nRet != 0:
+                print("frame is invalid!")
+                # 释放驱动图像缓存资源
+                # release frame resource before return
+                frame.contents.release(frame)
+                # 释放相关资源
+                # release stream source object before return
+                streamSource.contents.release(streamSource)
+                return -1
+
+            # 给转码所需的参数赋值
+            # fill conversion parameter
+            imageParams = IMGCNV_SOpenParam()
+            imageParams.dataSize = frame.contents.getImageSize(frame)
+            imageParams.height = frame.contents.getImageHeight(frame)
+            imageParams.width = frame.contents.getImageWidth(frame)
+            imageParams.paddingX = frame.contents.getImagePaddingX(frame)
+            imageParams.paddingY = frame.contents.getImagePaddingY(frame)
+            imageParams.pixelForamt = frame.contents.getImagePixelFormat(frame)
+
+            # 将裸数据图像拷出
+            # copy image data out from frame
+            imageBuff = frame.contents.getImage(frame)
+            userBuff = c_buffer(b'\0', imageParams.dataSize)
+            memmove(userBuff, c_char_p(imageBuff), imageParams.dataSize)
+
+            # 释放驱动图像缓存
+            # release frame resource at the end of use
+            frame.contents.release(frame)
+
+            # 如果图像格式是 Mono8 直接使用
+            # no format conversion required for Mono8
+            if imageParams.pixelForamt == EPixelType.gvspPixelMono8:
+                grayByteArray = bytearray(userBuff)
+                cvImage = numpy.array(grayByteArray).reshape(imageParams.height, imageParams.width)
+            else:
+                # 转码 => BGR24
+                # convert to BGR24
+                rgbSize = c_int()
+                rgbBuff = c_buffer(b'\0', imageParams.height * imageParams.width * 3)
+
+                nRet = IMGCNV_ConvertToBGR24(cast(userBuff, c_void_p),
+                                             byref(imageParams),
+                                             cast(rgbBuff, c_void_p),
+                                             byref(rgbSize))
+
+                colorByteArray = bytearray(rgbBuff)
+                cvImage = numpy.array(colorByteArray).reshape(imageParams.height, imageParams.width, 3)
+
+            cv2.imshow('myWindow', cvImage)
+
+            if cv2.waitKey(1) >= 0:
+                isGrab = False
+                break
+        cv2.destroyAllWindows()
+
         pass
 
     def stop_grabbing_clicked(self):
+        global camera, streamSource, userInfo, cameraList, trigModeEnumNode
         # 反注册回调函数
         # unsubscribe grabbing callback
         nRet = streamSource.contents.detachGrabbingEx(streamSource, frameCallbackFuncEx, userInfo)
@@ -203,6 +291,7 @@ class MainWindow(QMainWindow):
         pass
 
     def trigger_software_clicked(self):
+        global camera, streamSource, userInfo, cameraList, trigModeEnumNode
         if (self.ui.checkbtn_trigger_software.isChecked):
             # 设置软触发
             # set software trigger config
@@ -228,10 +317,51 @@ class MainWindow(QMainWindow):
         pass
 
     def trigger_once_clicked(self):
+        global camera, streamSource, userInfo, cameraList, trigModeEnumNode
+        # 创建流对象
+        # create stream source object
+        streamSourceInfo = GENICAM_StreamSourceInfo()
+        streamSourceInfo.channelId = 0
+        streamSourceInfo.pCamera = pointer(camera)
+
+        streamSource = pointer(GENICAM_StreamSource())
+        nRet = GENICAM_createStreamSource(pointer(streamSourceInfo), byref(streamSource))
+        if (nRet != 0):
+            print("create StreamSource fail!")
+            return -1
+
+        # 通用属性设置:设置触发模式为off --根据属性类型，直接构造属性节点。如触发模式是 enumNode，构造enumNode节点
+        # create corresponding property node according to the value type of property, here is enumNode
+        # 自由拉流：TriggerMode 需为 off
+        # set trigger mode to Off for continuously grabbing
+        trigModeEnumNode = pointer(GENICAM_EnumNode())
+        trigModeEnumNodeInfo = GENICAM_EnumNodeInfo()
+        trigModeEnumNodeInfo.pCamera = pointer(camera)
+        trigModeEnumNodeInfo.attrName = b"TriggerMode"
+        nRet = GENICAM_createEnumNode(byref(trigModeEnumNodeInfo), byref(trigModeEnumNode))
+        if (nRet != 0):
+            print("create TriggerMode Node fail!")
+            # 释放相关资源
+            # release node resource before return
+            streamSource.contents.release(streamSource)
+            return -1
+
+        nRet = trigModeEnumNode.contents.setValueBySymbol(trigModeEnumNode, b"Off")
+        if (nRet != 0):
+            print("set TriggerMode value [Off] fail!")
+            # 释放相关资源
+            # release node resource before return
+            trigModeEnumNode.contents.release(trigModeEnumNode)
+            streamSource.contents.release(streamSource)
+            return -1
+
+        # 需要释放Node资源
+        # release node resource at the end of use
+        trigModeEnumNode.contents.release(trigModeEnumNode)
         # 开始拉流
         # start grabbing
-        nRet = streamSource.contents.startGrabbing(streamSource, c_ulonglong(0), \
-                                                   c_int(GENICAM_EGrabStrategy.grabStrartegySequential))
+        nRet = streamSource.contents.startGrabbing(streamSource, c_ulonglong(0),
+                                                   c_int(GENICAM_EGrabStrategy.grabStrartegyLatestImage))
         if nRet != 0:
             print("startGrabbing fail!")
             # 释放相关资源
@@ -267,6 +397,58 @@ class MainWindow(QMainWindow):
         pass
 
     def save_bmp_clicked(self):
+        global camera, streamSource, userInfo, cameraList, trigModeEnumNode
+        # 创建流对象
+        # create stream source object
+        streamSourceInfo = GENICAM_StreamSourceInfo()
+        streamSourceInfo.channelId = 0
+        streamSourceInfo.pCamera = pointer(camera)
+
+        streamSource = pointer(GENICAM_StreamSource())
+        nRet = GENICAM_createStreamSource(pointer(streamSourceInfo), byref(streamSource))
+        if (nRet != 0):
+            print("create StreamSource fail!")
+            return -1
+
+        # 通用属性设置:设置触发模式为off --根据属性类型，直接构造属性节点。如触发模式是 enumNode，构造enumNode节点
+        # create corresponding property node according to the value type of property, here is enumNode
+        # 自由拉流：TriggerMode 需为 off
+        # set trigger mode to Off for continuously grabbing
+        trigModeEnumNode = pointer(GENICAM_EnumNode())
+        trigModeEnumNodeInfo = GENICAM_EnumNodeInfo()
+        trigModeEnumNodeInfo.pCamera = pointer(camera)
+        trigModeEnumNodeInfo.attrName = b"TriggerMode"
+        nRet = GENICAM_createEnumNode(byref(trigModeEnumNodeInfo), byref(trigModeEnumNode))
+        if (nRet != 0):
+            print("create TriggerMode Node fail!")
+            # 释放相关资源
+            # release node resource before return
+            streamSource.contents.release(streamSource)
+            return -1
+
+        nRet = trigModeEnumNode.contents.setValueBySymbol(trigModeEnumNode, b"Off")
+        if (nRet != 0):
+            print("set TriggerMode value [Off] fail!")
+            # 释放相关资源
+            # release node resource before return
+            trigModeEnumNode.contents.release(trigModeEnumNode)
+            streamSource.contents.release(streamSource)
+            return -1
+
+        # 需要释放Node资源
+        # release node resource at the end of use
+        trigModeEnumNode.contents.release(trigModeEnumNode)
+
+        # 开始拉流
+        # start grabbing
+        nRet = streamSource.contents.startGrabbing(streamSource, c_ulonglong(0), \
+                                                   c_int(GENICAM_EGrabStrategy.grabStrartegySequential))
+        if (nRet != 0):
+            print("startGrabbing fail!")
+            # 释放相关资源
+            # release stream source object before return
+            streamSource.contents.release(streamSource)
+            return -1
         # 主动取图
         # get one frame
         frame = pointer(GENICAM_Frame())
@@ -328,7 +510,7 @@ class MainWindow(QMainWindow):
             # 初始化调色板rgbQuad 实际应用中 rgbQuad 只需初始化一次
             # initialize color palette
             for i in range(0, 256):
-                rgbQuad[i].rgbBlue = rgbQuad[i].rgbGreen = rgbQuad[i].rgbRed = i;
+                rgbQuad[i].rgbBlue = rgbQuad[i].rgbGreen = rgbQuad[i].rgbRed = i
 
             uRgbQuadLen = sizeof(RGBQUAD) * 256
             bmpFileHeader.bfSize = sizeof(bmpFileHeader) + sizeof(bmpInfoHeader) + uRgbQuadLen + convertParams.dataSize
@@ -337,7 +519,7 @@ class MainWindow(QMainWindow):
             # 转码 => BGR24
             # convert to BGR24
             rgbSize = c_int()
-            nRet = IMGCNV_ConvertToBGR24(cast(frameBuff, c_void_p), byref(convertParams), \
+            nRet = IMGCNV_ConvertToBGR24(cast(frameBuff, c_void_p), byref(convertParams),
                                          cast(rgbBuff, c_void_p), byref(rgbSize))
 
             if nRet != 0:
@@ -407,9 +589,10 @@ class MainWindow(QMainWindow):
         pass
 
     def get_paramater_clicked(self):
+        global camera, streamSource, userInfo, cameraList, trigModeEnumNode
         exposure_time = 0
         nRet = getExposureTime(camera, exposure_time)
-        self.ui.ExposureTime.setText(exposure_time)
+        self.ui.line_exposure_time.setText(str(exposure_time))
         if nRet != 0:
             print("set ExposureTime fail")
             # 释放相关资源
@@ -419,9 +602,10 @@ class MainWindow(QMainWindow):
         pass
 
     def set_paramater_clicked(self):
+        global camera, streamSource, userInfo, cameraList, trigModeEnumNode
         # 设置曝光
         # set ExposureTime
-        nRet = setExposureTime(camera, self.ui.ExposureTime.toString())
+        nRet = setExposureTime(camera, int(self.ui.line_exposure_time.text()))
         if nRet != 0:
             print("set ExposureTime fail")
             # 释放相关资源
