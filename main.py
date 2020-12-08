@@ -5,6 +5,7 @@ import sys
 
 import cv2
 import numpy
+from PySide2.QtGui import QPixmap, QImage
 from PySide2.QtWidgets import QApplication, QMainWindow
 from PySide2.QtCore import QFile
 from ui_mainwindow import Ui_Form
@@ -27,6 +28,7 @@ class MainWindow(QMainWindow):
     def enum_devices_clicked(self):
         global camera, streamSource, userInfo, cameraList, trigModeEnumNode
         print('enum_devices_clicked')
+        # self.ui.label_photo.setPixmap(QPixmap("E:\Work\DAHUA\Python\image\image.bmp"))
 
         # 发现相机
         # enumerate camera
@@ -244,6 +246,7 @@ class MainWindow(QMainWindow):
             if imageParams.pixelForamt == EPixelType.gvspPixelMono8:
                 grayByteArray = bytearray(userBuff)
                 cvImage = numpy.array(grayByteArray).reshape(imageParams.height, imageParams.width)
+                image = QImage(grayByteArray, imageParams.width, imageParams.height, QImage.Format_Grayscale8)
             else:
                 # 转码 => BGR24
                 # convert to BGR24
@@ -257,14 +260,18 @@ class MainWindow(QMainWindow):
 
                 colorByteArray = bytearray(rgbBuff)
                 cvImage = numpy.array(colorByteArray).reshape(imageParams.height, imageParams.width, 3)
-
-            cv2.imshow('myWindow', cvImage)
-
-            if cv2.waitKey(1) >= 0:
-                isGrab = False
-                break
-        cv2.destroyAllWindows()
-
+                #
+                #     cv2.namedWindow('myWindow', 0)
+                #     cv2.resizeWindow('myWindow', 800, 600)
+                #     cv2.imshow('myWindow', cvImage)
+                #
+                #     if cv2.waitKey(1) >= 0:
+                #         isGrab = False
+                #         break
+                # cv2.destroyAllWindows()
+                image = QImage(colorByteArray, imageParams.width, imageParams.height, QImage.Format_RGB888)
+            # self.ui.graphicsView.SetImage(image)
+            self.ui.label_photo.setPixmap(QPixmap(image))
         pass
 
     def stop_grabbing_clicked(self):
