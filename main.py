@@ -260,18 +260,20 @@ class MainWindow(QMainWindow):
 
                 colorByteArray = bytearray(rgbBuff)
                 cvImage = numpy.array(colorByteArray).reshape(imageParams.height, imageParams.width, 3)
-                #
-                #     cv2.namedWindow('myWindow', 0)
-                #     cv2.resizeWindow('myWindow', 800, 600)
-                #     cv2.imshow('myWindow', cvImage)
-                #
-                #     if cv2.waitKey(1) >= 0:
-                #         isGrab = False
-                #         break
-                # cv2.destroyAllWindows()
-                image = QImage(colorByteArray, imageParams.width, imageParams.height, QImage.Format_RGB888)
-            # self.ui.graphicsView.SetImage(image)
-            self.ui.label_photo.setPixmap(QPixmap(image))
+
+            cv2.namedWindow('myWindow', 0)
+            cv2.resizeWindow('myWindow', 800, 600)
+            cv2.imshow('myWindow', cvImage)
+
+            if cv2.waitKey(1) >= 0:
+                isGrab = False
+                break
+            cv2.destroyAllWindows()
+            # image = QImage(colorByteArray, imageParams.width, imageParams.height, QImage.Format_RGB888)
+            # # self.ui.graphicsView.SetImage(image)
+            # if isGrab:
+            #     self.ui.label_photo.setPixmap(QPixmap(image))
+            #     isGrab = False
         pass
 
     def stop_grabbing_clicked(self):
@@ -285,6 +287,7 @@ class MainWindow(QMainWindow):
             # release stream source object before return
             streamSource.contents.release(streamSource)
             return -1
+
         # 停止拉流
         # stop grabbing
         nRet = streamSource.contents.stopGrabbing(streamSource)
@@ -391,6 +394,90 @@ class MainWindow(QMainWindow):
             return -1
         else:
             print("trigger time: " + str(datetime.datetime.now()))
+
+        # region 转换图
+        isGrab = True
+
+        while isGrab:
+            # 主动取图
+            # get one frame
+            frame = pointer(GENICAM_Frame())
+            nRet = streamSource.contents.getFrame(streamSource, byref(frame), c_uint(1000))
+            if nRet != 0:
+                print("getFrame fail! Timeout:[1000]ms")
+                # 释放相关资源
+                # release stream source object before return
+                streamSource.contents.release(streamSource)
+                return -1
+            else:
+                print("getFrame success BlockId = [" + str(
+                    frame.contents.getBlockId(frame)) + "], get frame time: " + str(datetime.datetime.now()))
+
+            nRet = frame.contents.valid(frame)
+            if nRet != 0:
+                print("frame is invalid!")
+                # 释放驱动图像缓存资源
+                # release frame resource before return
+                frame.contents.release(frame)
+                # 释放相关资源
+                # release stream source object before return
+                streamSource.contents.release(streamSource)
+                return -1
+
+            # 给转码所需的参数赋值
+            # fill conversion parameter
+            imageParams = IMGCNV_SOpenParam()
+            imageParams.dataSize = frame.contents.getImageSize(frame)
+            imageParams.height = frame.contents.getImageHeight(frame)
+            imageParams.width = frame.contents.getImageWidth(frame)
+            imageParams.paddingX = frame.contents.getImagePaddingX(frame)
+            imageParams.paddingY = frame.contents.getImagePaddingY(frame)
+            imageParams.pixelForamt = frame.contents.getImagePixelFormat(frame)
+
+            # 将裸数据图像拷出
+            # copy image data out from frame
+            imageBuff = frame.contents.getImage(frame)
+            userBuff = c_buffer(b'\0', imageParams.dataSize)
+            memmove(userBuff, c_char_p(imageBuff), imageParams.dataSize)
+
+            # 释放驱动图像缓存
+            # release frame resource at the end of use
+            frame.contents.release(frame)
+
+            # 如果图像格式是 Mono8 直接使用
+            # no format conversion required for Mono8
+            if imageParams.pixelForamt == EPixelType.gvspPixelMono8:
+                grayByteArray = bytearray(userBuff)
+                cvImage = numpy.array(grayByteArray).reshape(imageParams.height, imageParams.width)
+                image = QImage(grayByteArray, imageParams.width, imageParams.height, QImage.Format_Grayscale8)
+            else:
+                # 转码 => BGR24
+                # convert to BGR24
+                rgbSize = c_int()
+                rgbBuff = c_buffer(b'\0', imageParams.height * imageParams.width * 3)
+
+                nRet = IMGCNV_ConvertToBGR24(cast(userBuff, c_void_p),
+                                             byref(imageParams),
+                                             cast(rgbBuff, c_void_p),
+                                             byref(rgbSize))
+
+                colorByteArray = bytearray(rgbBuff)
+                cvImage = numpy.array(colorByteArray).reshape(imageParams.height, imageParams.width, 3)
+                #
+                #     cv2.namedWindow('myWindow', 0)
+                #     cv2.resizeWindow('myWindow', 800, 600)
+                #     cv2.imshow('myWindow', cvImage)
+                #
+                #     if cv2.waitKey(1) >= 0:
+                #         isGrab = False
+                #         break
+                # cv2.destroyAllWindows()
+                image = QImage(colorByteArray, imageParams.width, imageParams.height, QImage.Format_RGB888)
+            # self.ui.graphicsView.SetImage(image)
+            if isGrab:
+                self.ui.label_photo.setPixmap(QPixmap(image))
+                isGrab = False
+        # endregion
 
         # 停止拉流
         # stop grabbing
