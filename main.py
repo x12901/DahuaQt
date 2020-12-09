@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -- coding: utf-8 --
 # author: morgan time:2020/12/7
+import re
 import sys
 from threading import Thread
 
@@ -48,8 +49,11 @@ class MainWindow(QMainWindow):
             print("vendor name   = " + str(camera.getVendorName(camera)))
             print("Model  name   = " + str(camera.getModelName(camera)))
             print("Serial number = " + str(camera.getSerialNumber(camera)))
-
-            self.ui.combo_device_list.addItem(str(camera.getModelName(camera)))
+            test_str = str(camera.getModelName(camera))
+            regex = r"(.*)b'(.*)'"
+            matches = re.search(regex, test_str, re.MULTILINE)
+            # self.ui.combo_device_list.addItem(str(camera.getModelName(camera)))
+            self.ui.combo_device_list.addItem(matches.group(2))
 
         self.ui.line_device_number.setText(str(cameraCnt))
 
