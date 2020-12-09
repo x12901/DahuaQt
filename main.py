@@ -2,12 +2,13 @@
 # -- coding: utf-8 --
 # author: morgan time:2020/12/7
 import sys
+from threading import Thread
 
 import cv2
 import numpy
 from PySide2.QtGui import QPixmap, QImage
 from PySide2.QtWidgets import QApplication, QMainWindow
-from PySide2.QtCore import QFile
+from PySide2.QtCore import QFile, QTimer
 from ui_mainwindow import Ui_Form
 from Demo import *
 
@@ -17,6 +18,8 @@ streamSource = None
 userInfo = None
 trigModeEnumNode = None
 
+ths_top = False
+
 
 class MainWindow(QMainWindow):
 
@@ -24,6 +27,7 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
         self.ui = Ui_Form()
         self.ui.setupUi(self)
+        self.timer_camera = QTimer(self)
 
     def enum_devices_clicked(self):
         global camera, streamSource, userInfo, cameraList, trigModeEnumNode
@@ -129,7 +133,10 @@ class MainWindow(QMainWindow):
                 return -1
         pass
 
-    def start_grabbing_clicked(self):
+    ths_top = False
+
+    # 上面的这个来控制进程结束
+    def showcamre(self):
         global camera, streamSource, userInfo, cameraList, trigModeEnumNode
         # 创建流对象
         # create stream source object
@@ -193,9 +200,13 @@ class MainWindow(QMainWindow):
             streamSource.contents.release(streamSource)
             return -1
 
-        isGrab = True
+        global camera, streamSource, userInfo, cameraList, trigModeEnumNode
+        global ths_top
 
+        isGrab = True
         while isGrab:
+            if ths_top:
+                return
             # 主动取图
             # get one frame
             frame = pointer(GENICAM_Frame())
@@ -261,19 +272,27 @@ class MainWindow(QMainWindow):
                 colorByteArray = bytearray(rgbBuff)
                 cvImage = numpy.array(colorByteArray).reshape(imageParams.height, imageParams.width, 3)
 
-            cv2.namedWindow('myWindow', 0)
-            cv2.resizeWindow('myWindow', 800, 600)
-            cv2.imshow('myWindow', cvImage)
-
-            if cv2.waitKey(1) >= 0:
-                isGrab = False
-                break
-            cv2.destroyAllWindows()
-            # image = QImage(colorByteArray, imageParams.width, imageParams.height, QImage.Format_RGB888)
-            # # self.ui.graphicsView.SetImage(image)
-            # if isGrab:
-            #     self.ui.label_photo.setPixmap(QPixmap(image))
+            # cv2.namedWindow('myWindow', 0)
+            # cv2.resizeWindow('myWindow', 800, 600)
+            # cv2.imshow('myWindow', cvImage)
+            #
+            # if cv2.waitKey(1) >= 0:
             #     isGrab = False
+            #     break
+            # cv2.destroyAllWindows()
+            image_height, image_width, image_depth = cvImage.shape  # 获取图像的高，宽以及深度。
+            if image_depth == 3:
+                QIm = cv2.cvtColor(cvImage, cv2.COLOR_BGR2RGB)  # opencv读图片是BGR，qt显示要RGB，所以需要转换一下
+                QIm = QImage(QIm.data, image_width, image_height,  # 创建QImage格式的图像，并读入图像信息
+                             image_width * image_depth,
+                             QImage.Format_RGB888)
+                self.ui.label_photo.setPixmap(QPixmap(QIm))  # 将QImage显示在之前创建的QLabel控件中
+
+    def start_grabbing_clicked(self):
+
+        # 使用线程,否则程序卡死
+        th = Thread(target=self.showcamre)
+        th.start()
         pass
 
     def stop_grabbing_clicked(self):
@@ -716,3 +735,4 @@ if __name__ == "__main__":
     window.show()
 
     sys.exit(app.exec_())
+    ths_top = True
