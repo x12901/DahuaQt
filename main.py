@@ -140,12 +140,13 @@ class MainWindow(QMainWindow):
 
     def show_con(self):
         global ths_top
-        ### 强制进行垃圾回收
-        gc.collect()
 
-        ### 打印出对象数目最多的 50 个类型信息
-        objgraph.show_most_common_types(limit=50)
         while not ths_top:
+            ### 强制进行垃圾回收
+            gc.collect()
+
+            ### 打印出对象数目最多的 50 个类型信息
+            # objgraph.show_most_common_types(limit=50)
             if ths_top:
                 break
             # e1 = cv2.getTickCount()
