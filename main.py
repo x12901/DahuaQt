@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 # -- coding: utf-8 --
 # author: morgan time:2020/12/7
+import gc
 import re
 import sys
 from threading import Thread
 
 import cv2
 import numpy
+import objgraph
 from PySide2.QtGui import QPixmap, QImage
 from PySide2.QtWidgets import QApplication, QMainWindow
 from PySide2.QtCore import QFile, QTimer
@@ -30,7 +32,7 @@ class MainWindow(QMainWindow):
         # self.timer_camera = QTimer(self)
 
     def enum_devices_clicked(self):
-        global camera, streamSource, userInfo, cameraList, trigModeEnumNode
+        global camera, cameraList
         print('enum_devices_clicked')
         # self.ui.label_photo.setPixmap(QPixmap("E:\Work\DAHUA\Python\image\image.bmp"))
 
@@ -60,12 +62,12 @@ class MainWindow(QMainWindow):
         camera = cameraList[0]
 
     def device_list_changed(self):
-        global camera, streamSource, userInfo, cameraList, trigModeEnumNode
+        global camera, cameraList
         camera = cameraList[self.ui.combo_device_list.currentIndex()]
         pass
 
     def open_device_clicked(self):
-        global camera, streamSource, userInfo, cameraList, trigModeEnumNode
+        global camera
         # 打开相机
         # open camera
         nRet = openCamera(camera)
@@ -76,7 +78,7 @@ class MainWindow(QMainWindow):
         pass
 
     def close_device_clicked(self):
-        global camera, streamSource, userInfo, cameraList, trigModeEnumNode
+        global camera, streamSource
         # 关闭相机
         # close camera
         nRet = closeCamera(camera)
@@ -93,7 +95,7 @@ class MainWindow(QMainWindow):
         pass
 
     def radio_continuous_clicked(self):
-        global camera, streamSource, userInfo, cameraList, trigModeEnumNode
+        global streamSource, trigModeEnumNode
         if self.ui.radio_continuous.isChecked():
             nRet = trigModeEnumNode.contents.setValueBySymbol(trigModeEnumNode, b"Off")
             if nRet != 0:
@@ -115,7 +117,7 @@ class MainWindow(QMainWindow):
         pass
 
     def radio_trigger_clicked(self):
-        global camera, streamSource, userInfo, cameraList, trigModeEnumNode
+        global streamSource, trigModeEnumNode
         if self.ui.radio_trigger.isChecked():
             nRet = trigModeEnumNode.contents.setValueBySymbol(trigModeEnumNode, b"on")
             if nRet != 0:
@@ -138,13 +140,19 @@ class MainWindow(QMainWindow):
 
     def show_con(self):
         global ths_top
+        ### 强制进行垃圾回收
+        gc.collect()
+
+        ### 打印出对象数目最多的 50 个类型信息
+        objgraph.show_most_common_types(limit=50)
         while not ths_top:
             if ths_top:
                 break
             # e1 = cv2.getTickCount()
             self.trigger_once_clicked()
             # e2 = cv2.getTickCount()
-            # print((e2 - e1) / cv2.getTickFrequency())
+            # print((e2 - e1) / cv2.getTickFr
+            # equency())
             time.sleep(0.2)
 
     def start_grabbing_clicked(self):
@@ -156,7 +164,7 @@ class MainWindow(QMainWindow):
         pass
 
     def stop_grabbing_clicked(self):
-        global camera, streamSource, userInfo, cameraList, trigModeEnumNode, ths_top
+        global streamSource, ths_top
 
         ths_top = True
         # # 反注册回调函数
@@ -182,7 +190,7 @@ class MainWindow(QMainWindow):
         pass
 
     def trigger_software_clicked(self):
-        global camera, streamSource, userInfo, cameraList, trigModeEnumNode
+        global camera, streamSource
         if (self.ui.checkbtn_trigger_software.isChecked):
             # 设置软触发
             # set software trigger config
@@ -208,7 +216,7 @@ class MainWindow(QMainWindow):
         pass
 
     def trigger_once_clicked(self):
-        global camera, streamSource, userInfo, cameraList, trigModeEnumNode
+        global camera, streamSource, trigModeEnumNode
         # 创建流对象
         # create stream source object
         streamSourceInfo = GENICAM_StreamSourceInfo()
@@ -354,7 +362,6 @@ class MainWindow(QMainWindow):
                 #         break
                 # cv2.destroyAllWindows()
                 image = QImage(colorByteArray, imageParams.width, imageParams.height, QImage.Format_RGB888)
-            # self.ui.graphicsView.SetImage(image)
             if isGrab:
                 self.ui.label_photo.setPixmap(QPixmap(image))
                 isGrab = False
@@ -372,7 +379,7 @@ class MainWindow(QMainWindow):
         pass
 
     def save_bmp_clicked(self):
-        global camera, streamSource, userInfo, cameraList, trigModeEnumNode
+        global camera, streamSource, trigModeEnumNode
         # 创建流对象
         # create stream source object
         streamSourceInfo = GENICAM_StreamSourceInfo()
@@ -416,7 +423,7 @@ class MainWindow(QMainWindow):
 
         # 开始拉流
         # start grabbing
-        nRet = streamSource.contents.startGrabbing(streamSource, c_ulonglong(0), \
+        nRet = streamSource.contents.startGrabbing(streamSource, c_ulonglong(0),
                                                    c_int(GENICAM_EGrabStrategy.grabStrartegySequential))
         if (nRet != 0):
             print("startGrabbing fail!")
@@ -564,7 +571,7 @@ class MainWindow(QMainWindow):
         pass
 
     def get_paramater_clicked(self):
-        global camera, streamSource, userInfo, cameraList, trigModeEnumNode
+        global camera, streamSource
         exposure_time = 0
         nRet = getExposureTime(camera, exposure_time)
         self.ui.line_exposure_time.setText(str(exposure_time))
@@ -577,7 +584,7 @@ class MainWindow(QMainWindow):
         pass
 
     def set_paramater_clicked(self):
-        global camera, streamSource, userInfo, cameraList, trigModeEnumNode
+        global camera, streamSource
         # 设置曝光
         # set ExposureTime
         nRet = setExposureTime(camera, int(self.ui.line_exposure_time.text()))
